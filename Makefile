@@ -10,10 +10,10 @@ test-app:
 	docker compose -p $(PROJECT_NAME) -f ./deploy/docker-compose.test.yml down --remove-orphans
 
 build-db-initer-app:
-	docker build -t fetch-system-db-initer:latest -f ./deploy/Dockerfile.dbiniter .
+	docker build -t fetch-system/util/db-initer:latest -f ./deploy/Dockerfile.dbiniter .
 
 build-preparer-app:
-	docker build -t fetch-system-preparer:latest -f ./deploy/Dockerfile.preparer .
+	docker build -t fetch-system/util/preparer:latest -f ./deploy/Dockerfile.preparer .
 
 generate-proto:
 	@protocf --go_out=. ./api/protobuf/model.proto
