@@ -10,7 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-
 type Client = Queries
 
 func NewDB(c *resolver.ConfigMap) (*Client, error) {
@@ -39,10 +38,15 @@ func NewDB(c *resolver.ConfigMap) (*Client, error) {
 		return nil, err
 	}
 
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, database)
+	config, err := pgx.ParseConfig(fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		host, port, user, password, database,
+	))
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse config: %w", err)
+	}
 
-	db, err := pgx.Connect(context.Background(), psqlInfo)
+	db, err := pgx.ConnectConfig(context.Background(), config)
 
 	if err != nil {
 		return nil, err
@@ -68,8 +72,6 @@ func (c *Client) Ping(ctx context.Context) error {
 		return nil
 	}
 }
-
-
 
 func (c *Client) Close() {
 	c.db.(*pgx.Conn).Close(context.Background())
