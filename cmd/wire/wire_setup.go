@@ -9,12 +9,13 @@ import (
 
 	"github.com/Goboolean/common/pkg/resolver"
 	"github.com/Goboolean/fetch-system.IaC/internal/connect"
+	"github.com/Goboolean/fetch-system.IaC/internal/dbiniter"
 	"github.com/Goboolean/fetch-system.IaC/internal/etcd"
+	"github.com/Goboolean/fetch-system.IaC/internal/influxdb"
 	"github.com/Goboolean/fetch-system.IaC/internal/kafka"
 	"github.com/Goboolean/fetch-system.IaC/internal/kis"
 	"github.com/Goboolean/fetch-system.IaC/internal/polygon"
 	"github.com/Goboolean/fetch-system.IaC/internal/preparer"
-	"github.com/Goboolean/fetch-system.IaC/internal/dbiniter"
 	"github.com/Goboolean/fetch-system.IaC/pkg/db"
 	"github.com/google/wire"
 	"github.com/pkg/errors"
@@ -23,11 +24,9 @@ import (
 	_ "github.com/Goboolean/common/pkg/env"
 )
 
-
-
 func ProvideKafkaConfig() *resolver.ConfigMap {
 	return &resolver.ConfigMap{
-		"BOOTSTRAP_HOST": os.Getenv("KAFKA_BOOTSTRAP_HOST"),		
+		"BOOTSTRAP_HOST": os.Getenv("KAFKA_BOOTSTRAP_HOST"),
 	}
 }
 
@@ -39,9 +38,9 @@ func ProvideETCDConfig() *resolver.ConfigMap {
 
 func ProvidePostgreSQLConfig() *resolver.ConfigMap {
 	return &resolver.ConfigMap{
-		"HOST": os.Getenv("POSTGRES_HOST"),
-		"PORT": os.Getenv("POSTGRES_PORT"),
-		"USER": os.Getenv("POSTGRES_USER"),
+		"HOST":     os.Getenv("POSTGRES_HOST"),
+		"PORT":     os.Getenv("POSTGRES_PORT"),
+		"USER":     os.Getenv("POSTGRES_USER"),
 		"PASSWORD": os.Getenv("POSTGRES_PASSWORD"),
 		"DATABASE": os.Getenv("POSTGRES_DATABASE"),
 	}
@@ -49,9 +48,9 @@ func ProvidePostgreSQLConfig() *resolver.ConfigMap {
 
 func ProvideKafkaConnectConfig() *resolver.ConfigMap {
 	return &resolver.ConfigMap{
-		"HOST": os.Getenv("KAFKA_CONNECT_HOST"),
+		"HOST":                   os.Getenv("KAFKA_CONNECT_HOST"),
 		"MONGODB_CONNECTION_URI": os.Getenv("MONGODB_CONNECTION_URI"),
-		"MONGODB_DATABASE": os.Getenv("MONGODB_DATABASE"),
+		"MONGODB_DATABASE":       os.Getenv("MONGODB_DATABASE"),
 	}
 }
 
@@ -67,7 +66,13 @@ func ProvidePolygonConfig() *resolver.ConfigMap {
 	}
 }
 
-
+func ProvideInfluxDBConfig() *resolver.ConfigMap {
+	return &resolver.ConfigMap{
+		"URL":          os.Getenv("INFLUXDB_URL"),
+		"TOKEN":        os.Getenv("INFLUXDB_TOKEN"),
+		"ORGANIZATION": os.Getenv("INFLUXDB_ORGANIZATION"),
+	}
+}
 
 func ProvideKafkaConfigurator(ctx context.Context, c *resolver.ConfigMap) (*kafka.Configurator, func(), error) {
 	k, err := kafka.New(c)
@@ -100,7 +105,6 @@ func ProvideKafkaProducer(ctx context.Context, c *resolver.ConfigMap) (*kafka.Co
 		log.Info("Kafka producer is successfully closed")
 	}, nil
 }
-
 
 func ProvideETCDClient(ctx context.Context, c *resolver.ConfigMap) (*etcd.Client, func(), error) {
 	e, err := etcd.New(c)
@@ -153,6 +157,22 @@ func ProvideKafkaConnectClient(ctx context.Context, c *resolver.ConfigMap) (*con
 	}, nil
 }
 
+func ProvideInfluxDBClient(ctx context.Context, c *resolver.ConfigMap) (*influxdb.Client, func(), error) {
+	i, err := influxdb.New(c)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "Failed to create influxdb client")
+	}
+	if err := i.Ping(ctx); err != nil {
+		return nil, nil, errors.Wrap(err, "Failed to send ping to influxdb client")
+	}
+	log.Info("InfluxDB client is ready")
+
+	return i, func() {
+		i.Close()
+		log.Info("InfluxDB client is successfully closed")
+	}, nil
+}
+
 func ProvideKISReader(c *resolver.ConfigMap) (*kis.Reader, error) {
 	return kis.New(c)
 }
@@ -160,8 +180,6 @@ func ProvideKISReader(c *resolver.ConfigMap) (*kis.Reader, error) {
 func ProvidePolygonClient(c *resolver.ConfigMap) (*polygon.Client, error) {
 	return polygon.New(c)
 }
-
-
 
 func InitializeKafkaConfigurator(ctx context.Context) (*kafka.Configurator, func(), error) {
 	wire.Build(
@@ -219,14 +237,20 @@ func InitializePolygonClient() (*polygon.Client, error) {
 	return nil, nil
 }
 
-
+func InitializeInfluxDBClient(ctx context.Context) (*influxdb.Client, func(), error) {
+	wire.Build(
+		ProvideInfluxDBConfig,
+		ProvideInfluxDBClient,
+	)
+	return nil, nil, nil
+}
 
 func InitializePreparer(ctx context.Context) (*preparer.Manager, func(), error) {
 	wire.Build(
 		InitializeKafkaConfigurator,
 		InitializeETCDClient,
 		InitializePostgreSQLClient,
-		InitializeKafkaConnectClient,
+		InitializeInfluxDBClient,
 		preparer.New,
 	)
 	return nil, nil, nil
