@@ -13,8 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
-
 func TestScenario(t *testing.T) {
 
 	var preparer *preparer.Manager
@@ -24,7 +22,7 @@ func TestScenario(t *testing.T) {
 	var topics []string
 
 	const (
-		connectorName = "preparer.connector"
+		connectorName  = "preparer.connector"
 		connectorTasks = 10
 	)
 
@@ -53,7 +51,7 @@ func TestScenario(t *testing.T) {
 	})
 
 	t.Cleanup(func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		err := connect.DeleteAllConnectors(ctx)
@@ -71,7 +69,7 @@ func TestScenario(t *testing.T) {
 	})
 
 	t.Run("SyncETCDToDB", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		var err error
@@ -89,10 +87,10 @@ func TestScenario(t *testing.T) {
 
 		start := time.Now()
 
-		ctx, cancel := context.WithTimeout(context.Background(), 100 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
 
-		err := preparer.PrepareTopicsBatch(ctx, connectorName, connectorTasks, topics)
+		err := preparer.PrepareTopics(ctx, topics)
 		assert.NoError(t, err)
 
 		elasped := time.Since(start)
