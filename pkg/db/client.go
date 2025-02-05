@@ -49,7 +49,7 @@ func NewDB(c *resolver.ConfigMap) (*Client, error) {
 	db, err := pgx.ConnectConfig(context.Background(), config)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to connect to db: %s, %w", config.ConnString(), err)
 	}
 
 	q := New(db)
