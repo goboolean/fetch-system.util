@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"sync"
 
 	"github.com/Goboolean/common/pkg/resolver"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/domain"
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
 )
 
 const (
 	maxConcurrentConnections = 20
+	maxErrorsLimit           = 5
 )
 
 type Client struct {
@@ -94,35 +95,37 @@ func (c *Client) CreateBucket(ctx context.Context, bucket string) error {
 }
 
 func (c *Client) CreateBuckets(ctx context.Context, buckets []string) error {
-	var wg sync.WaitGroup
-	errChan := make(chan error, len(buckets))
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	for _, bucket := range buckets {
-		if err := c.semaphore.Acquire(ctx, 1); err != nil {
-			return fmt.Errorf("failed to acquire semaphore: %w", err)
-		}
-		wg.Add(1)
+	g, ctx := errgroup.WithContext(ctx)
 
-		go func(bucket string) {
-			defer wg.Done()
+	errCount := 0
+
+	for _, bucket := range buckets {
+		if errCount >= maxErrorsLimit {
+			continue
+		}
+
+		bucket := bucket
+
+		g.Go(func() error {
+			if err := c.semaphore.Acquire(ctx, 1); err != nil {
+				errCount++
+				return fmt.Errorf("failed to acquire semaphore: %w", err)
+			}
 			defer c.semaphore.Release(1)
 
 			if err := c.CreateBucket(ctx, bucket); err != nil {
-				errChan <- fmt.Errorf("failed to create bucket %s: %w", bucket, err)
-				cancel()
+				errCount++
+				return fmt.Errorf("failed to create bucket %s: %w", bucket, err)
 			}
-		}(bucket)
+			return nil
+		})
 	}
 
-	wg.Wait()
-	close(errChan)
-
-	for err := range errChan {
-		if err != nil {
-			return err
-		}
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("failed to create buckets: %w", err)
 	}
 
 	return nil
