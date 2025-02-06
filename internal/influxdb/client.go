@@ -7,7 +7,6 @@ import (
 
 	"github.com/Goboolean/common/pkg/resolver"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"github.com/influxdata/influxdb-client-go/v2/domain"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
 )
@@ -60,10 +59,7 @@ func (c *Client) Ping(ctx context.Context) error {
 
 func (c *Client) createBucket(ctx context.Context, bucket string) error {
 	bucketsAPI := c.client.BucketsAPI()
-	_, err := bucketsAPI.CreateBucket(ctx, &domain.Bucket{
-		Name:  bucket,
-		OrgID: &c.org,
-	})
+	_, err := bucketsAPI.CreateBucketWithNameWithID(ctx, c.org, bucket)
 	if err != nil {
 		return fmt.Errorf("failed to create bucket %s: %w", bucket, err)
 	}
