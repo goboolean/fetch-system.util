@@ -33,7 +33,7 @@ func New(c *resolver.ConfigMap) (*Client, error) {
 		return nil, err
 	}
 
-	org, err := c.GetStringKey("ORGANIZATION")
+	org, err := c.GetStringKey("ORG_ID")
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (c *Client) createBucket(ctx context.Context, bucket string) error {
 
 func (c *Client) isBucketExists(ctx context.Context, bucket string) (bool, error) {
 	bucketsAPI := c.client.BucketsAPI()
-	buckets, err := bucketsAPI.FindBucketsByOrgName(ctx, c.org)
+	buckets, err := bucketsAPI.FindBucketsByOrgID(ctx, c.org)
 	if err != nil {
 		return false, fmt.Errorf("failed to list buckets: %w", err)
 	}
