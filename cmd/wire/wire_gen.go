@@ -210,11 +210,13 @@ func ProvidePolygonConfig() *resolver.ConfigMap {
 }
 
 func ProvideInfluxDBConfig() *resolver.ConfigMap {
-	return &resolver.ConfigMap{
-		"URL":          os.Getenv("INFLUXDB_URL"),
-		"TOKEN":        os.Getenv("INFLUXDB_TOKEN"),
-		"ORGANIZATION": os.Getenv("INFLUXDB_ORGANIZATION"),
+	config := &resolver.ConfigMap{
+		"URL":    os.Getenv("INFLUXDB_URL"),
+		"TOKEN":  os.Getenv("INFLUXDB_TOKEN"),
+		"ORG_ID": os.Getenv("INFLUXDB_ORG_ID"),
 	}
+
+	return config
 }
 
 func ProvideKafkaConfigurator(ctx context.Context, c *resolver.ConfigMap) (*kafka.Configurator, func(), error) {
