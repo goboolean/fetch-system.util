@@ -60,7 +60,10 @@ func (c *Client) Ping(ctx context.Context) error {
 
 func (c *Client) createBucket(ctx context.Context, bucket string) error {
 	bucketsAPI := c.client.BucketsAPI()
-	_, err := bucketsAPI.CreateBucketWithName(ctx, &domain.Organization{Id: &c.org}, bucket)
+	_, err := bucketsAPI.CreateBucket(ctx, &domain.Bucket{
+		Name:  bucket,
+		OrgID: &c.org,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to create bucket %s: %w", bucket, err)
 	}
