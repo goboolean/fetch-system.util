@@ -73,12 +73,6 @@ func ProvideInfluxDBConfig() *resolver.ConfigMap {
 		"ORG_ID": os.Getenv("INFLUXDB_ORG_ID"),
 	}
 
-	log.WithFields(log.Fields{
-		"URL":    config["URL"],
-		"TOKEN":  config["TOKEN"],
-		"ORG_ID": config["ORG_ID"],
-	}).Debug("InfluxDB Configuration")
-
 	return config
 }
 
