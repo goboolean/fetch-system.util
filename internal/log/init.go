@@ -6,14 +6,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-
-
 func init() {
 	logrus.SetFormatter(&logrus.TextFormatter{
-		DisableColors: false,
+		DisableColors:    false,
 		DisableTimestamp: false,
-		FullTimestamp: true,
+		FullTimestamp:    true,
 	})
-	logrus.SetLevel(logrus.InfoLevel)
+	logrus.SetLevel(logrus.DebugLevel)
 	logrus.SetOutput(os.Stdout)
 }
