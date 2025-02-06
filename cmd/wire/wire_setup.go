@@ -77,7 +77,7 @@ func ProvideInfluxDBConfig() *resolver.ConfigMap {
 		"URL":    config["URL"],
 		"TOKEN":  config["TOKEN"],
 		"ORG_ID": config["ORG_ID"],
-	}).Info("InfluxDB Configuration")
+	}).Debug("InfluxDB Configuration")
 
 	return config
 }

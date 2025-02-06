@@ -14,9 +14,9 @@ import (
 	_ "github.com/Goboolean/fetch-system.IaC/internal/log"
 )
 
-
 func main() {
 	log.Info("Application started")
+	log.SetLevel(log.DebugLevel)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
