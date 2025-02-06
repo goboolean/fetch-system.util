@@ -68,9 +68,9 @@ func ProvidePolygonConfig() *resolver.ConfigMap {
 
 func ProvideInfluxDBConfig() *resolver.ConfigMap {
 	return &resolver.ConfigMap{
-		"URL":          os.Getenv("INFLUXDB_URL"),
-		"TOKEN":        os.Getenv("INFLUXDB_TOKEN"),
-		"ORGANIZATION": os.Getenv("INFLUXDB_ORGANIZATION"),
+		"URL":    os.Getenv("INFLUXDB_URL"),
+		"TOKEN":  os.Getenv("INFLUXDB_TOKEN"),
+		"ORG_ID": os.Getenv("INFLUXDB_ORG_ID"),
 	}
 }
 
