@@ -14,7 +14,6 @@ import (
 )
 
 func main() {
-	log.SetLevel(log.InfoLevel)
 	log.Info("Application started")
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
@@ -26,14 +25,16 @@ func main() {
 	}
 	defer cleanup()
 
-	topics, err := preparer.SyncETCDToDB(ctx)
+	_, err = preparer.SyncETCDToDB(ctx)
 	if err != nil {
 		log.Panic(errors.Wrap(err, "Failed to synchronize etcd to db"))
 	}
 
-	if err := preparer.PrepareTopics(ctx, topics); err != nil {
-		log.Panic(errors.Wrap(err, "Failed to prepare topics"))
-	}
+	/*
+		if err := preparer.PrepareTopics(ctx, topics); err != nil {
+			log.Panic(errors.Wrap(err, "Failed to prepare topics"))
+		}
+	*/
 
 	log.Info("Application successfully finished")
 }
