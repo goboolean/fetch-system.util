@@ -256,9 +256,6 @@ func ProvideETCDClient(ctx context.Context, c *resolver.ConfigMap) (*etcd.Client
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "Failed to create etcd client")
 	}
-	if err := e.Ping(ctx); err != nil {
-		return nil, nil, errors.Wrap(err, "Failed to send ping to etcd client")
-	}
 	logrus.Info("ETCD client is ready")
 
 	return e, func() {
