@@ -15,8 +15,8 @@ import (
 )
 
 func main() {
+	log.SetLevel(log.InfoLevel)
 	log.Info("Application started")
-	log.SetLevel(log.DebugLevel)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
