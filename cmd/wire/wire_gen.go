@@ -129,16 +129,8 @@ func InitializePreparer(ctx context.Context) (*preparer.Manager, func(), error) 
 		cleanup()
 		return nil, nil, err
 	}
-	influxdbClient, cleanup4, err := InitializeInfluxDBClient(ctx)
-	if err != nil {
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	manager := preparer.New(client, queries, configurator, influxdbClient)
+	manager := preparer.New(client, queries, configurator)
 	return manager, func() {
-		cleanup4()
 		cleanup3()
 		cleanup2()
 		cleanup()

@@ -22,13 +22,11 @@ func New(
 	etcd *etcd.Client,
 	db *db.Client,
 	conf *kafka.Configurator,
-	influxdb *influxdb.Client,
 ) *Manager {
 	return &Manager{
-		etcd:     etcd,
-		db:       db,
-		conf:     conf,
-		influxdb: influxdb,
+		etcd: etcd,
+		db:   db,
+		conf: conf,
 	}
 }
 

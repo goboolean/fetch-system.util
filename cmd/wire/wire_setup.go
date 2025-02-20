@@ -254,7 +254,6 @@ func InitializePreparer(ctx context.Context) (*preparer.Manager, func(), error) 
 		InitializeKafkaConfigurator,
 		InitializeETCDClient,
 		InitializePostgreSQLClient,
-		InitializeInfluxDBClient,
 		preparer.New,
 	)
 	return nil, nil, nil
