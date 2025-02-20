@@ -7,11 +7,7 @@ import (
 	"github.com/Goboolean/common/pkg/resolver"
 	log "github.com/sirupsen/logrus"
 	"go.etcd.io/etcd/client/v3"
-	"go.etcd.io/etcd/client/v3/concurrency"
 )
-
-
-
 
 type Client struct {
 	client *clientv3.Client
@@ -44,11 +40,6 @@ func New(c *resolver.ConfigMap) (*Client, error) {
 		return nil, err
 	}
 
-	s, err := concurrency.NewSession(client)
-	s.Done()
-
-	concurrency.NewLocker(s, "lock")
-
 	return &Client{
 		client: client,
 	}, nil
@@ -59,7 +50,6 @@ func (c *Client) ping(ctx context.Context) error {
 	_, err := mapi.Status(ctx, c.client.Endpoints()[0])
 	return err
 }
-
 
 func (c *Client) Ping(ctx context.Context) error {
 	for {
@@ -77,11 +67,9 @@ func (c *Client) Ping(ctx context.Context) error {
 	}
 }
 
-
 func (c *Client) Close() error {
 	return c.client.Close()
 }
-
 
 func (c *Client) Cleanup() error {
 	_, err := c.client.Delete(context.Background(), "", clientv3.WithPrefix())
